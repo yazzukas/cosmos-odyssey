@@ -22,9 +22,11 @@ namespace CosmosOdyssey.Shared
 
         [Key]
         public int Id { get; set; }
-        [Required, MaxLength(20)]
+        [Required]
+        [StringLength(20, MinimumLength = 2, ErrorMessage = "First name length must be between 2 and 20 characters.")]
         public string FirstName { get; set; }
-        [Required, MaxLength(20)]
+        [Required]
+        [StringLength(20, MinimumLength = 2, ErrorMessage = "Last name length must be between 2 and 20 characters.")]
         public string LastName { get; set; }
         [Required]
         public DateTime CreatedTime { get; set; }

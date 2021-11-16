@@ -1,6 +1,5 @@
 ﻿@page "/travelroutes"
 
-@inject NavigationManager NavigationManager
 @inject HttpClient Http
 @inject IDialogService DialogService
 
@@ -83,6 +82,8 @@ else
     {
         Reservation reservation = new Reservation(routeInfo.From.Name, routeInfo.To.Name, provider.Price, provider.TravelTime, provider.Company.Name, id);
         var parameters = new DialogParameters { ["reservation"] = reservation, ["travelPriceId"] = travelPrices.TravelPricesId };
+
+        // show buy ticket dialog
         var dialog = DialogService.Show<ReservationDialog>("Reservation", parameters);
         var result = await dialog.Result;
 
@@ -103,10 +104,7 @@ else
     private bool isRouteAvailable(Leg travelPrice)
     {
         if (origin.Equals(travelPrice.RouteInfo.From.Name) && destination.Equals(travelPrice.RouteInfo.To.Name))
-        {
-            routeAvailable = true;
-            return true;
-        }
+            return routeAvailable = true;
         return false;
     }
 

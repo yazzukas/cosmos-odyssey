@@ -6,7 +6,6 @@ using Microsoft.Extensions.Logging;
 using System.Net.Http;
 using System.Net.Http.Json;
 using CosmosOdyssey.Shared;
-using Microsoft.AspNetCore.Mvc;
 using CosmosOdyssey.Server.Data;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
@@ -20,10 +19,11 @@ namespace CosmosOdyssey.Server
 
         private readonly HttpClient _httpClient;
         private readonly IServiceScopeFactory _scopeFactory;
+        private readonly ILogger<TravelPricesUpdaterService> _logger;
+
+        private readonly int _maxTravelPrices = 15;
 
         public bool IsRunning { get; set; }
-
-        private readonly ILogger<TravelPricesUpdaterService> _logger;
 
         public TravelPricesUpdaterService(HttpClient httpClient, ILogger<TravelPricesUpdaterService> logger, IServiceScopeFactory scopeFactory)
         {
@@ -36,31 +36,41 @@ namespace CosmosOdyssey.Server
         {
             using (var scope = _scopeFactory.CreateScope())
             {
-                var _db = scope.ServiceProvider.GetRequiredService<ReservationContext>();
+                var _db = scope.ServiceProvider.GetRequiredService<SpaceTravelContext>();
                 try
                 {
                     _logger.LogInformation($"{nameof(TravelPricesUpdaterService)} starting {nameof(ExecuteAsync)}");
                     IsRunning = true;
                     while (!stoppingToken.IsCancellationRequested)
                     {
-                        TravelPrices newTravelPrices = await _httpClient.GetFromJsonAsync<TravelPrices>("https://cosmos-odyssey.azurewebsites.net/api/v1.0/TravelPrices");
-                        var newWaitTime = newTravelPrices.ValidUntil.AddHours(2).TimeOfDay - DateTime.Now.TimeOfDay;
-                        Console.WriteLine(newTravelPrices.ValidUntil.AddHours(2).TimeOfDay);
-                        Console.WriteLine(newWaitTime);
+                        var newTravelPrices = await _httpClient.GetFromJsonAsync<TravelPrices>("https://cosmos-odyssey.azurewebsites.net/api/v1.0/TravelPrices");
+
+                        #if DEBUG
+                        var newWaitTime = newTravelPrices.ValidUntil.AddHours(2).AddSeconds(1).TimeOfDay - DateTime.Now.TimeOfDay;
+                        #else
+                        var newWaitTime = newTravelPrices.ValidUntil.AddSeconds(1).TimeOfDay - DateTime.Now.TimeOfDay;
+                        #endif
+
+                        _logger.LogInformation($"{nameof(TravelPricesUpdaterService)} new update time: {newWaitTime}"); ;
+
+                        // if new data is not loaded to the database
                         if (!_db.TravelPrices.Any() || 
                             !_db.TravelPrices.OrderBy(p => p.ValidUntil).LastOrDefault().TravelPricesId.Equals(newTravelPrices.TravelPricesId))
                         {
-                            Console.WriteLine("1");
                             await _db.TravelPrices.AddAsync(newTravelPrices, stoppingToken);
                             await _db.SaveChangesAsync(stoppingToken);
                         }
-                        Console.WriteLine(_db.TravelPrices.Count());
-                        if (_db.TravelPrices.Count() == 4)
+
+                        _logger.LogInformation($"{nameof(TravelPricesUpdaterService)} TravelPrices count: {_db.TravelPrices.Count()}");
+
+                        // 
+                        if (_db.TravelPrices.Count() == _maxTravelPrices)
                         {
                             DeleteReservations(_db);
                             DeleteTravelPrices(_db);
                             await _db.SaveChangesAsync(stoppingToken);
                         }
+
                         _logger.LogInformation($"{nameof(TravelPricesUpdaterService)} running {nameof(ExecuteAsync)}");
                         await Task.Delay(newWaitTime);
                     }
@@ -78,9 +88,9 @@ namespace CosmosOdyssey.Server
             }
         }
 
-        private static void DeleteReservations(ReservationContext _db)
+        private static void DeleteReservations(SpaceTravelContext _db)
         {
-            List<Reservation> reservations = _db.Reservations
+            var reservations = _db.Reservations
                                 .Where(r => r.TravelPriceId.Equals(_db.TravelPrices.OrderBy(p => p.ValidUntil).FirstOrDefault().TravelPricesId))
                                 .ToList();
             foreach (var reservation in reservations)
@@ -89,9 +99,9 @@ namespace CosmosOdyssey.Server
             }
         }
 
-        private static void DeleteTravelPrices(ReservationContext _db)
+        private static void DeleteTravelPrices(SpaceTravelContext _db)
         {
-            TravelPrices removePrices = _db.TravelPrices
+            var removePrices = _db.TravelPrices
                                 .Include(p => p.Legs)
                                 .ThenInclude(p => p.RouteInfo)
                                 .ThenInclude(p => p.From)
@@ -102,6 +112,7 @@ namespace CosmosOdyssey.Server
                                 .ThenInclude(p => p.Providers)
                                 .ThenInclude(p => p.Company)
                                 .ToList().OrderBy(p => p.ValidUntil).FirstOrDefault();
+
             foreach (var leg in removePrices.Legs)
             {
                 foreach (var provider in leg.Providers)

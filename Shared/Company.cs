@@ -13,9 +13,11 @@ namespace CosmosOdyssey.Shared
     public class Company
     {
         [Key]
+        [Required]
         public int CompanyId { get; set; }
+        [Required]
         public string Id { get; set; }
-
+        [Required]
         public string Name { get; set; }
     }
 }

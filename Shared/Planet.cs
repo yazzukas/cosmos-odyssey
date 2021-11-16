@@ -12,7 +12,9 @@ namespace CosmosOdyssey.Shared
     {
         [JsonPropertyName("Id")]
         [Key]
+        [Required]
         public string PlanetId { get; set; }
+        [Required]
         public string Name { get; set; }
     }
 }

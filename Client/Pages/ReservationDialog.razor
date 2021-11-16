@@ -35,7 +35,6 @@
 @code {
     [CascadingParameter] MudDialogInstance MudDialog { get; set; }
 
-    //[Parameter] public Provider provider { get; set; } = new Provider();
     [Parameter] public Reservation reservation { get; set; }
     [Parameter] public string travelPriceId { get; set; }
 
@@ -52,7 +51,6 @@
             var response = await Http.PostAsJsonAsync("api/reservations", reservation);
             response.EnsureSuccessStatusCode();
             var boolean = await response.Content.ReadFromJsonAsync<bool>();
-            //In a real world scenario this bool would probably be a service to delete the item from api/database
             MudDialog.Close(DialogResult.Ok(boolean));
         }
         else MudDialog.Close(DialogResult.Ok(false));

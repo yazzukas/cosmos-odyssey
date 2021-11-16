@@ -13,17 +13,11 @@ namespace CosmosOdyssey.Shared
     {
         [JsonPropertyName("Id")]
         [Key]
+        [Required]
         public string LegId { get; set; }
-
+        [Required]
         public RouteInfo RouteInfo { get; set; }
-
         [Required]
         public virtual ICollection<Provider> Providers { get; set; }
-
-        /*
-        [ForeignKey("TravelPricesId")]
-        [Required]
-        public virtual TravelPrices TravelPrices { get; set; }
-        public virtual string TravelPricesId { get; set; }*/
     }
 }

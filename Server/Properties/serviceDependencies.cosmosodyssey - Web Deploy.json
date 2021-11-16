@@ -5,12 +5,6 @@
       "connectionId": "ConnectionStrings:CosmosOdysseyConnection",
       "suggestion": "true",
       "ignored": "true"
-    },
-    "secrets1": {
-      "type": "secrets",
-      "connectionId": "",
-      "suggestion": "true",
-      "ignored": "true"
     }
   }
 }

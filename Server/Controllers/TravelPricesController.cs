@@ -1,20 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using CosmosOdyssey.Shared;
-using System.Net.Http;
-using System.Net.Http.Json;
-using Microsoft.AspNetCore.Components.Forms;
-using Microsoft.AspNetCore.Components.Routing;
-using Microsoft.AspNetCore.Components.Web;
-using Microsoft.AspNetCore.Components.Web.Virtualization;
-using Microsoft.AspNetCore.Components.WebAssembly.Http;
-using Microsoft.JSInterop;
-using CosmosOdyssey.Client;
-using CosmosOdyssey.Client.Shared;
-using System.Text.Json;
 using CosmosOdyssey.Server.Data;
 using Microsoft.EntityFrameworkCore;
 
@@ -24,13 +11,10 @@ namespace CosmosOdyssey.Server.Controllers
     [ApiController]
     public class TravelPricesController : Controller
     {
+        private readonly SpaceTravelContext _db;
 
-        private readonly HttpClient _httpClient;
-        private readonly ReservationContext _db;
-
-        public TravelPricesController(HttpClient httpClient, ReservationContext db)
+        public TravelPricesController(SpaceTravelContext db)
         {
-            _httpClient = httpClient;
             _db = db;
         }
         
@@ -49,8 +33,6 @@ namespace CosmosOdyssey.Server.Controllers
                 .ThenInclude(p => p.Providers)
                 .ThenInclude(p => p.Company)
                 .ToList().OrderBy(p => p.ValidUntil).LastOrDefault();
-            // need to use OnModelCreating
-            //return context.TravelPrices.Include(p => p.Legs).ToList().Last();
         }
 
         [HttpGet("lasttravelpriceid")]
@@ -58,14 +40,7 @@ namespace CosmosOdyssey.Server.Controllers
         {
             await using var context = _db;
             return context.TravelPrices.OrderBy(p => p.ValidUntil).LastOrDefault().TravelPricesId;
-            // need to use OnModelCreating
-            //return context.TravelPrices.Include(p => p.Legs).ToList().Last();
-        }
 
-        [HttpGet("1")]
-        public async Task<TravelPrices> GetTravelPricesOld()
-        {
-            return await _httpClient.GetFromJsonAsync<TravelPrices>("https://cosmos-odyssey.azurewebsites.net/api/v1.0/TravelPrices");
         }
     }
 }

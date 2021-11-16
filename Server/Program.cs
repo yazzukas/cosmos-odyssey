@@ -5,10 +5,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace CosmosOdyssey.Server
 {
@@ -22,7 +18,7 @@ namespace CosmosOdyssey.Server
             var scopeFactory = host.Services.GetRequiredService<IServiceScopeFactory>();
             using (var scope = scopeFactory.CreateScope())
             {
-                var db = scope.ServiceProvider.GetRequiredService<ReservationContext>();
+                var db = scope.ServiceProvider.GetRequiredService<SpaceTravelContext>();
                 if (db.Database.EnsureCreated())
                 {
                     //SeedData.Initialize(db);

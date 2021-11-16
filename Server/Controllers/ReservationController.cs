@@ -2,7 +2,6 @@
 using System;
 using CosmosOdyssey.Shared;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using CosmosOdyssey.Server.Data;
@@ -13,32 +12,33 @@ namespace CosmosOdyssey.Server.Controllers
     [ApiController]
     public class ReservationController : Controller
     {
-        private readonly ReservationContext _db;
+        private readonly SpaceTravelContext _db;
 
-
-        public ReservationController(ReservationContext db)
+        public ReservationController(SpaceTravelContext db)
         {
             _db = db;
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<Reservation>>> GetOrders()
+        public async Task<ActionResult<List<Reservation>>> GetReservations()
         {
             var orders = await _db.Reservations.ToListAsync();
             return orders;
         }
 
         [HttpPost]
-        public async Task<ActionResult<bool>> PlaceOrder(Reservation order)
+        public async Task<ActionResult<bool>> AddReservation(Reservation reservation)
         {
-            
-            Console.WriteLine("tere");
-            order.CreatedTime = DateTime.Now;          
+            if(reservation != null)
+            {
+                reservation.CreatedTime = DateTime.Now;
 
-            await _db.Reservations.AddAsync(order);
-            await _db.SaveChangesAsync();
+                await _db.Reservations.AddAsync(reservation);
+                await _db.SaveChangesAsync();
 
-            return true;
+                return true;
+            }
+            return false;
         }
     }
 }

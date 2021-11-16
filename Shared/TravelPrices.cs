@@ -12,10 +12,11 @@ namespace CosmosOdyssey.Shared
     {
         [JsonPropertyName("Id")]
         [Key]
+        [Required]
         public string TravelPricesId { get; set; }
-
+        [Required]
         public DateTime ValidUntil { get; set; }
-        
+        [Required]
         public virtual ICollection<Leg> Legs { get; set; }
     }
 }

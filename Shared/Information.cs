@@ -8,13 +8,13 @@ namespace CosmosOdyssey.Shared
 {
     public class Information
     {
-        public static List<string> PlanetNames = new() { "Earth", "Mars", "Venus", "Jupiter", "Saturn", "Uranus", "Neptune", "Mercury" };
+        public static IEnumerable<string> PlanetNames = new List<string> { "Earth", "Mars", "Venus", "Jupiter", "Saturn", "Uranus", "Neptune", "Mercury" };
 
-        //public static readonly List<List<string>> PossibleRoutes = new List<string>;
         public static Dictionary<string, List<string>> PossibleRoutes = new()
         {
             { "Earth", new List<string> { "Jupiter", "Uranus" } },
             { "Venus", new List<string> { "Earth", "Mercury" } },
+            { "Mars", new List<string> { "Venus" } },
             { "Mercury", new List<string> { "Venus" } },
             { "Jupiter", new List<string> { "Mars", "Venus" } },
             { "Saturn", new List<string> { "Earth", "Neptune" } },

@@ -13,15 +13,13 @@ namespace CosmosOdyssey.Shared
     {
         [JsonPropertyName("Id")]
         [Key]
+        [Required]
         public string RouteId { get; set; }
+        [Required]
         public Planet From { get; set; }
-
+        [Required]
         public Planet To { get; set; }
-
+        [Required]
         public double Distance { get; set; }
-        /*
-        [ForeignKey("LegId")]
-        public virtual Leg Leg { get; set; }
-        public string LegId { get; set; }*/
     }
 }

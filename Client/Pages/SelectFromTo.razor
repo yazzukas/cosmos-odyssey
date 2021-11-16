@@ -28,20 +28,12 @@
 
 @code {
 
-        EventCallback<IEnumerable<string>> GetItems { get; set; }
-
-    private bool _isEmptyField = false;
-
-    private EventCallbackArgs _args { get; set; }
-
     [Parameter] public string From { get; set; }
     [Parameter] public string Destination { get; set; }
     [Parameter] public EventCallback<EventCallbackArgs> RouteChanged { get; set; }
-    /*[Parameter]
-    public EventCallback<string> FromChanged { get; set; }
-    [Parameter]
-    public EventCallback<string> ToChanged { get; set; }*/
 
+    private bool _isEmptyField = false;
+    private EventCallbackArgs _args { get; set; }
     private List<string> _destinationPlanets = new List<string> { };
 
     private async Task OnConfirmationClick()
@@ -53,11 +45,9 @@
             _args = new EventCallbackArgs { From = From, To = Destination };
             await RouteChanged.InvokeAsync(_args);
         }
-        //await FromChanged.InvokeAsync(From);
-        //await ToChanged.InvokeAsync(To);
     }
 
-    void FromPlanetChange(string planet)
+    private void FromPlanetChange(string planet)
     {
         if (Information.PossibleRoutes.ContainsKey(planet))
         {

@@ -5,11 +5,8 @@ using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using System.Linq;
-using System.Net.Http;
 using Microsoft.EntityFrameworkCore;
 using CosmosOdyssey.Server.Data;
-using CosmosOdyssey.Server.Controllers;
 
 namespace CosmosOdyssey.Server
 {
@@ -34,18 +31,12 @@ namespace CosmosOdyssey.Server
                 .AddSingleton<TravelPricesUpdaterService>()
                 .AddHostedService(serviceCollection => serviceCollection.GetRequiredService<TravelPricesUpdaterService>());
 
-            /*services.AddDbContext<ReservationContext>(options =>
-                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));*/
-
-            services.AddDbContext<ReservationContext>(options =>
-                options.UseSqlite("Data Source=reservations.db",
+            services.AddDbContext<SpaceTravelContext>(options =>
+                options.UseSqlite(Configuration.GetConnectionString("CosmosOdysseyConnection"),
                 o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery))
                 /*.EnableSensitiveDataLogging()*/);
 
-            if (!services.Any(x => x.ServiceType == typeof(HttpClient)))
-            {
-                services.AddSingleton<HttpClient>();
-            }
+            services.AddHttpClient();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
