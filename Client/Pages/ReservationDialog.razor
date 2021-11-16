@@ -1,4 +1,6 @@
-﻿@inject HttpClient Http
+﻿
+
+@inject HttpClient Http
 
 <MudDialog>
     <TitleContent>
@@ -8,31 +10,30 @@
         </MudText>
     </TitleContent>
     <DialogContent>
-        <MudTextField Value="@reservation.TravelCompanyName" Label="Company name" ReadOnly="true" />
-        <MudTextField Value="@reservation.Price" Label="Travel price" ReadOnly="true" />
-        <MudTextField Value="@reservation.TravelTime" Label="Travel time (minutes)" ReadOnly="true" />
-        <MudTextField Value="@reservation.From" Label="From" ReadOnly="true" />
-        <MudTextField Value="@reservation.To" Label="To" ReadOnly="true" />
-        <MudTextField @bind-Value="Firstname" Label="First name" Variant="Variant.Text"></MudTextField>
-        <MudTextField @bind-Value="Lastname" Label="Last name" Variant="Variant.Text"></MudTextField>
+        <EditForm Model="@reservation" OnValidSubmit="AddReservation">
+            <DataAnnotationsValidator />
+            <MudCard>
+                <MudCardContent>
+                    <MudTextField Value="@reservation.TravelCompanyName" Label="Company name" ReadOnly="true" />
+                    <MudTextField Value="@reservation.Price" Label="Travel price" ReadOnly="true" />
+                    <MudTextField Value="@Math.Round(reservation.TravelTime, 2)" Label="Travel time (days)" ReadOnly="true" />
+                    <MudTextField Value="@reservation.From" Label="From" ReadOnly="true" />
+                    <MudTextField Value="@reservation.To" Label="To" ReadOnly="true" />
+                    <MudTextField @bind-Value="reservation.FirstName" For="@(() => reservation.FirstName)" Label="First name" Variant="Variant.Text"></MudTextField>
+                    <MudTextField @bind-Value="reservation.LastName" For="@(() => reservation.LastName)" Label="Last name" Variant="Variant.Text"></MudTextField>
+                </MudCardContent>
+                <MudCardActions>
+                    <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">Buy ticket</MudButton>
+                </MudCardActions>
+            </MudCard>           
+        </EditForm>
     </DialogContent>
-    <DialogActions>
-        <MudButton OnClick="Cancel">Cancel</MudButton>
-        <MudButton Color="Color.Error" OnClick="AddReservation">Buy ticket</MudButton>
-    </DialogActions>
 </MudDialog>
 
 
 
 @code {
     [CascadingParameter] MudDialogInstance MudDialog { get; set; }
-
-    bool success;
-    MudForm form;
-    string[] errors = { };
-
-    string Firstname;
-    string Lastname;
 
     //[Parameter] public Provider provider { get; set; } = new Provider();
     [Parameter] public Reservation reservation { get; set; }
@@ -48,8 +49,6 @@
         string lastTravelPriceId = await Http.GetStringAsync("api/travelprices/lasttravelpriceid");
         if (travelPriceId.Equals(lastTravelPriceId))
         {
-            reservation.FirstName = Firstname;
-            reservation.LastName = Lastname;
             var response = await Http.PostAsJsonAsync("api/reservations", reservation);
             response.EnsureSuccessStatusCode();
             var boolean = await response.Content.ReadFromJsonAsync<bool>();
@@ -57,6 +56,5 @@
             MudDialog.Close(DialogResult.Ok(boolean));
         }
         else MudDialog.Close(DialogResult.Ok(false));
-
     }
 }

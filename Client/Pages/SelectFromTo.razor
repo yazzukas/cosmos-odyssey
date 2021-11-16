@@ -1,7 +1,7 @@
 ﻿
 <MudGrid Class="d-flex justify-space-between py-2 px-1 mt-6">
     <MudItem xs="12" sm="6" md="6">
-        <MudSelect T="string" Label="From" HelperText="Where your trip starts?" @bind-value="From">
+        <MudSelect T="string" Label="From" HelperText="Where your trip starts?" ValueChanged="@((string planet) => { FromPlanetChange(planet); })">
             @foreach (var planet in Information.PlanetNames)
             {
                 <MudSelectItem Value=@planet />
@@ -10,7 +10,7 @@
     </MudItem>
     <MudItem xs="12" sm="6" md="6">
         <MudSelect T="string" Label="Destination" HelperText="Where your trip ends?" @bind-value="Destination">
-            @foreach (var planet in Information.PlanetNames)
+            @foreach (var planet in _destinationPlanets)
             {
                 <MudSelectItem Value=@planet />
             }
@@ -28,7 +28,7 @@
 
 @code {
 
-    public bool showRoundtrips { get; set; } = true;
+        EventCallback<IEnumerable<string>> GetItems { get; set; }
 
     private bool _isEmptyField = false;
 
@@ -41,6 +41,8 @@
     public EventCallback<string> FromChanged { get; set; }
     [Parameter]
     public EventCallback<string> ToChanged { get; set; }*/
+
+    private List<string> _destinationPlanets = new List<string> { };
 
     private async Task OnConfirmationClick()
     {
@@ -55,6 +57,13 @@
         //await ToChanged.InvokeAsync(To);
     }
 
-
+    void FromPlanetChange(string planet)
+    {
+        if (Information.PossibleRoutes.ContainsKey(planet))
+        {
+            From = planet;
+            _destinationPlanets = Information.PossibleRoutes[planet];
+        }
+    }
 
 }
