@@ -1,0 +1,47 @@
+﻿@page "/tickets"
+
+@inject HttpClient Http
+
+<MudText Typo="Typo.h3">Reservations</MudText>
+
+@if (_reservations == null)
+{
+    <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="my-7" />
+}
+else
+{
+    <MudTable Items="@_reservations" Hover="true" Breakpoint="Breakpoint.Sm">
+        <HeaderContent>
+            <MudTh><MudTableSortLabel SortBy="new Func<Reservation, object>(x=>x.FirstName)">First name</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<Reservation, object>(x=>x.LastName)">Last name</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<Reservation, object>(x=>x.CreatedTime)">Created time</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<Reservation, object>(x=>x.From)">From</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<Reservation, object>(x=>x.To)">To</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<Reservation, object>(x=>x.Price)">Price</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<Reservation, object>(x=>x.TravelTime)">Travel time</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<Reservation, object>(x=>x.TravelCompanyName)">Company name</MudTableSortLabel></MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="First name">@context.FirstName</MudTd>
+            <MudTd DataLabel="Last name">@context.LastName</MudTd>
+            <MudTd DataLabel="Created time">@context.CreatedTime</MudTd>
+            <MudTd DataLabel="From">@context.From</MudTd>
+            <MudTd DataLabel="To">@context.To</MudTd>
+            <MudTd DataLabel="Price">@context.Price</MudTd>
+            <MudTd DataLabel="Travel time">@Math.Round(context.TravelTime, 2) days</MudTd>
+            <MudTd DataLabel="Company name">@context.TravelCompanyName</MudTd>
+        </RowTemplate>
+        <PagerContent>
+            <MudTablePager PageSizeOptions="new int[]{5, 10}" />
+        </PagerContent>
+    </MudTable>
+}
+
+@code {
+    private List<Reservation> _reservations;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _reservations = await Http.GetFromJsonAsync<List<Reservation>>("api/reservations");
+    }
+}

@@ -1,0 +1,30 @@
+﻿@page "/buy"
+
+<MudText Typo="Typo.h3">Buy ticket</MudText>
+
+<SelectFromTo RouteChanged="@FindRoutes"></SelectFromTo>
+
+<MudDivider DividerType="DividerType.Middle" Class="my-6" />
+
+@if (_findRoutes)
+{
+    <TravelRoutes @ref="ChildComponent" origin="@_from" destination="@_to"></TravelRoutes>
+}
+
+@code {
+    protected TravelRoutes ChildComponent;
+
+    private string _from = "";
+    private string _to = "";
+
+    private bool _findRoutes = false;
+
+    private void FindRoutes(EventCallbackArgs args)
+    {
+        _from = args.From;
+        _to = args.To;
+        Console.WriteLine("tere");
+        if(_findRoutes) ChildComponent.Refresh();
+        else _findRoutes = true;
+    }
+}

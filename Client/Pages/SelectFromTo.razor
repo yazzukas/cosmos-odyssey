@@ -1,0 +1,60 @@
+﻿
+<MudGrid Class="d-flex justify-space-between py-2 px-1 mt-6">
+    <MudItem xs="12" sm="6" md="6">
+        <MudSelect T="string" Label="From" HelperText="Where your trip starts?" @bind-value="From">
+            @foreach (var planet in Information.PlanetNames)
+            {
+                <MudSelectItem Value=@planet />
+            }
+        </MudSelect>
+    </MudItem>
+    <MudItem xs="12" sm="6" md="6">
+        <MudSelect T="string" Label="Destination" HelperText="Where your trip ends?" @bind-value="Destination">
+            @foreach (var planet in Information.PlanetNames)
+            {
+                <MudSelectItem Value=@planet />
+            }
+        </MudSelect>
+    </MudItem>
+    <MudItem xs="12" sm="12" md="12">
+        <MudButton Variant="Variant.Filled" EndIcon="@Icons.Filled.Search" Color="Color.Primary" FullWidth="true" @onclick="OnConfirmationClick">Find travel routes</MudButton>
+    </MudItem>
+</MudGrid>
+
+@if (_isEmptyField)
+{
+    <MudAlert Severity="Severity.Error" Variant="Variant.Filled" Class="my-2">Select travel start and end planet!</MudAlert>
+}
+
+@code {
+
+    public bool showRoundtrips { get; set; } = true;
+
+    private bool _isEmptyField = false;
+
+    private EventCallbackArgs _args { get; set; }
+
+    [Parameter] public string From { get; set; }
+    [Parameter] public string Destination { get; set; }
+    [Parameter] public EventCallback<EventCallbackArgs> RouteChanged { get; set; }
+    /*[Parameter]
+    public EventCallback<string> FromChanged { get; set; }
+    [Parameter]
+    public EventCallback<string> ToChanged { get; set; }*/
+
+    private async Task OnConfirmationClick()
+    {
+        if (From == null || Destination == null) _isEmptyField = true;
+        else
+        {
+            _isEmptyField = false;
+            _args = new EventCallbackArgs { From = From, To = Destination };
+            await RouteChanged.InvokeAsync(_args);
+        }
+        //await FromChanged.InvokeAsync(From);
+        //await ToChanged.InvokeAsync(To);
+    }
+
+
+
+}

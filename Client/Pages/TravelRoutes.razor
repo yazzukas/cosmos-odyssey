@@ -1,0 +1,105 @@
+﻿@page "/travelroutes"
+
+@inject NavigationManager NavigationManager
+@inject HttpClient Http
+@inject IDialogService DialogService
+
+@if (boughtTicket)
+{
+    <MudAlert Severity="Severity.Success" Variant="Variant.Filled" Class="my-2">The ticket was bought succesfully!</MudAlert>
+}
+else if (travelPricesExpiredError)
+{
+    <MudAlert Severity="Severity.Error" Variant="Variant.Filled" Class="my-2">The travel prices are expired! Find new travel routes with the new prices!</MudAlert>
+}
+
+@if (travelPrices == null)
+{
+    <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="my-7" />
+}
+else
+{
+    @foreach (var travelPrice in travelPrices.Legs)
+    {
+        if (isRouteAvailable(travelPrice))
+        {
+            <MudTable Items="@travelPrice.Providers" Hover="true" SortLabel="Sort By" Breakpoint="Breakpoint.Sm">
+                <HeaderContent>
+                    <MudTh>Company name</MudTh>
+                    <MudTh><MudTableSortLabel SortBy="new Func<Provider, object>(x=>x.Price)">Price</MudTableSortLabel></MudTh>
+                    <MudTh><MudTableSortLabel SortBy="new Func<RouteInfo, object>(x=>x.Distance)">Distance</MudTableSortLabel></MudTh>
+                    <MudTh><MudTableSortLabel SortBy="new Func<Provider, object>(x=>x.TravelTime)">Travel time</MudTableSortLabel></MudTh>
+                    <MudTh></MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd DataLabel="Company name">@context.Company.Name</MudTd>
+                    <MudTd DataLabel="Price">@context.Price</MudTd>
+                    <MudTd DataLabel="Distance">@travelPrice.RouteInfo.Distance</MudTd>
+                    <MudTd DataLabel="Travel time">@Math.Round(context.TravelTime, 2) days</MudTd>
+                    <MudTd><MudButton Variant="Variant.Filled" Color="Color.Primary" @onclick="@((e) => BuyTicket(context, travelPrice.RouteInfo, travelPrices.TravelPricesId))">Buy ticket</MudButton></MudTd>
+                </RowTemplate>
+                <PagerContent>
+                    <MudTablePager PageSizeOptions="new int[]{5, 10}" />
+                </PagerContent>
+            </MudTable>
+        }
+    }
+    if (routeAvailable == false)
+    {
+        <MudAlert Severity="Severity.Error" Variant="Variant.Filled" Class="my-2">This travel route is not available!</MudAlert>
+    }
+}
+
+
+@code {
+    [Parameter] public string origin { get; set; }
+    [Parameter] public string destination { get; set; }
+
+    private TravelPrices travelPrices;
+
+    private bool routeAvailable = false;
+
+    private bool boughtTicket = false;
+    private bool travelPricesExpiredError = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        travelPrices = await Http.GetFromJsonAsync<TravelPrices>("api/travelprices");
+    }
+
+    protected override void OnParametersSet()
+    {
+        routeAvailable = false;
+    }
+
+    private async Task BuyTicket(Provider provider, RouteInfo routeInfo, string id)
+    {
+        Reservation reservation = new Reservation(routeInfo.From.Name, routeInfo.To.Name, provider.Price, provider.TravelTime, provider.Company.Name, id);
+        var parameters = new DialogParameters { ["reservation"] = reservation, ["travelPriceId"] = travelPrices.TravelPricesId };
+        var dialog = DialogService.Show<ReservationDialog>("Reservation", parameters);
+        var result = await dialog.Result;
+
+        if (!result.Cancelled)
+        {
+            if ((bool)result.Data == true)
+                boughtTicket = true;
+            else
+                travelPricesExpiredError = true;
+        }
+    }
+
+    public void Refresh()
+    {
+        StateHasChanged();
+    }
+
+    private bool isRouteAvailable(Leg travelPrice)
+    {
+        if (origin.Equals(travelPrice.RouteInfo.From.Name) && destination.Equals(travelPrice.RouteInfo.To.Name))
+        {
+            routeAvailable = true;
+            return true;
+        }
+        return false;
+    }
+}

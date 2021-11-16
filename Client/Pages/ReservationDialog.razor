@@ -1,0 +1,62 @@
+﻿@inject HttpClient Http
+
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            <MudIcon Icon="@Icons.Filled.AttachMoney" Class="mr-3 mb-n1" />
+            Ticket
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudTextField Value="@reservation.TravelCompanyName" Label="Company name" ReadOnly="true" />
+        <MudTextField Value="@reservation.Price" Label="Travel price" ReadOnly="true" />
+        <MudTextField Value="@reservation.TravelTime" Label="Travel time (minutes)" ReadOnly="true" />
+        <MudTextField Value="@reservation.From" Label="From" ReadOnly="true" />
+        <MudTextField Value="@reservation.To" Label="To" ReadOnly="true" />
+        <MudTextField @bind-Value="Firstname" Label="First name" Variant="Variant.Text"></MudTextField>
+        <MudTextField @bind-Value="Lastname" Label="Last name" Variant="Variant.Text"></MudTextField>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Error" OnClick="AddReservation">Buy ticket</MudButton>
+    </DialogActions>
+</MudDialog>
+
+
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+    bool success;
+    MudForm form;
+    string[] errors = { };
+
+    string Firstname;
+    string Lastname;
+
+    //[Parameter] public Provider provider { get; set; } = new Provider();
+    [Parameter] public Reservation reservation { get; set; }
+    [Parameter] public string travelPriceId { get; set; }
+
+    private void Cancel()
+    {
+        MudDialog.Cancel();
+    }
+
+    protected async void AddReservation()
+    {
+        string lastTravelPriceId = await Http.GetStringAsync("api/travelprices/lasttravelpriceid");
+        if (travelPriceId.Equals(lastTravelPriceId))
+        {
+            reservation.FirstName = Firstname;
+            reservation.LastName = Lastname;
+            var response = await Http.PostAsJsonAsync("api/reservations", reservation);
+            response.EnsureSuccessStatusCode();
+            var boolean = await response.Content.ReadFromJsonAsync<bool>();
+            //In a real world scenario this bool would probably be a service to delete the item from api/database
+            MudDialog.Close(DialogResult.Ok(boolean));
+        }
+        else MudDialog.Close(DialogResult.Ok(false));
+
+    }
+}
