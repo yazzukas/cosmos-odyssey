@@ -4,6 +4,8 @@ Made with Blazor and MudBlazor.
 
 Both client and server code is written in C#.
 
+Live link: https://cosmosodyssey.azurewebsites.net/
+
 ## Development
 
 Open terminal and run these commands.
