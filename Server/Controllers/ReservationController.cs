@@ -22,8 +22,8 @@ namespace CosmosOdyssey.Server.Controllers
         [HttpGet]
         public async Task<ActionResult<List<Reservation>>> GetReservations()
         {
-            var orders = await _db.Reservations.ToListAsync();
-            return orders;
+            var reservations = await _db.Reservations.ToListAsync();
+            return reservations;
         }
 
         [HttpPost]

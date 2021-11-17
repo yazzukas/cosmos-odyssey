@@ -9,7 +9,7 @@
         </MudSelect>
     </MudItem>
     <MudItem xs="12" sm="6" md="6">
-        <MudSelect T="string" Label="Destination" HelperText="Where your trip ends?" @bind-value="Destination">
+        <MudSelect T="string" Text="@Destination" Label="Destination" HelperText="Where your trip ends?" @bind-value="Destination">
             @foreach (var planet in _destinationPlanets)
             {
                 <MudSelectItem Value=@planet />
@@ -38,7 +38,11 @@
 
     private async Task OnConfirmationClick()
     {
-        if (From == null || Destination == null) _isEmptyField = true;
+        if (From == null || Destination == null)
+        {
+            _isEmptyField = true;
+            await RouteChanged.InvokeAsync(null);
+        }
         else
         {
             _isEmptyField = false;
@@ -49,6 +53,7 @@
 
     private void FromPlanetChange(string planet)
     {
+        Destination = null;
         if (Information.PossibleRoutes.ContainsKey(planet))
         {
             From = planet;

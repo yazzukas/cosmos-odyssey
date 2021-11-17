@@ -23,6 +23,8 @@ namespace CosmosOdyssey.Server
 
         private readonly int _maxTravelPrices = 15;
 
+        private readonly string _travelPricesApiLink = "https://cosmos-odyssey.azurewebsites.net/api/v1.0/TravelPrices";
+
         public bool IsRunning { get; set; }
 
         public TravelPricesUpdaterService(HttpClient httpClient, ILogger<TravelPricesUpdaterService> logger, IServiceScopeFactory scopeFactory)
@@ -43,7 +45,7 @@ namespace CosmosOdyssey.Server
                     IsRunning = true;
                     while (!stoppingToken.IsCancellationRequested)
                     {
-                        var newTravelPrices = await _httpClient.GetFromJsonAsync<TravelPrices>("https://cosmos-odyssey.azurewebsites.net/api/v1.0/TravelPrices");
+                        var newTravelPrices = await _httpClient.GetFromJsonAsync<TravelPrice>(_travelPricesApiLink);
 
                         #if DEBUG
                         var newWaitTime = newTravelPrices.ValidUntil.AddHours(2).AddSeconds(1).TimeOfDay - DateTime.Now.TimeOfDay;
@@ -53,7 +55,7 @@ namespace CosmosOdyssey.Server
 
                         _logger.LogInformation($"{nameof(TravelPricesUpdaterService)} new update time: {newWaitTime}"); ;
 
-                        // if new data is not loaded to the database
+                        // if new travel prices are not loaded to the database
                         if (!_db.TravelPrices.Any() || 
                             !_db.TravelPrices.OrderBy(p => p.ValidUntil).LastOrDefault().TravelPricesId.Equals(newTravelPrices.TravelPricesId))
                         {
@@ -63,12 +65,13 @@ namespace CosmosOdyssey.Server
 
                         _logger.LogInformation($"{nameof(TravelPricesUpdaterService)} TravelPrices count: {_db.TravelPrices.Count()}");
 
-                        // 
-                        if (_db.TravelPrices.Count() == _maxTravelPrices)
+                        // if there are more than _maxTravelPrices(15) TravelPrice tables, then delete
+                        if (_db.TravelPrices.Count() == _maxTravelPrices + 1)
                         {
                             DeleteReservations(_db);
                             DeleteTravelPrices(_db);
                             await _db.SaveChangesAsync(stoppingToken);
+                            _logger.LogInformation($"{nameof(TravelPricesUpdaterService)} deleted one TravelPrice data");
                         }
 
                         _logger.LogInformation($"{nameof(TravelPricesUpdaterService)} running {nameof(ExecuteAsync)}");

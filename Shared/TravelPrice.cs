@@ -8,7 +8,7 @@ using System.Text.Json.Serialization;
 
 namespace CosmosOdyssey.Shared
 {
-    public class TravelPrices
+    public class TravelPrice
     {
         [JsonPropertyName("Id")]
         [Key]

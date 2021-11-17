@@ -19,7 +19,7 @@ namespace CosmosOdyssey.Server.Controllers
         }
         
         [HttpGet]
-        public async Task<TravelPrices> GetTravelPrices()
+        public async Task<TravelPrice> GetTravelPrices()
         {
             await using var context = _db;
             return context.TravelPrices

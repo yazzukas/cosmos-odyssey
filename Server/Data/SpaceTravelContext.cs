@@ -17,7 +17,7 @@ namespace CosmosOdyssey.Server.Data
 
         public DbSet<Reservation> Reservations { get; set; }
 
-        public DbSet<TravelPrices> TravelPrices { get; set; }
+        public DbSet<TravelPrice> TravelPrices { get; set; }
 
         public DbSet<Company> Companies { get; set; }
 

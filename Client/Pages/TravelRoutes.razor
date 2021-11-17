@@ -5,11 +5,11 @@
 
 @if (boughtTicket)
 {
-    <MudAlert Severity="Severity.Success" Variant="Variant.Filled" Class="my-2">The ticket was bought succesfully!</MudAlert>
+    <MudAlert Severity="Severity.Success" Variant="Variant.Filled" Class="my-2">The ticket was bought successfully!</MudAlert>
 }
 else if (travelPricesExpiredError)
 {
-    <MudAlert Severity="Severity.Error" Variant="Variant.Filled" Class="my-2">The travel prices are expired! Find new travel routes with the new prices!</MudAlert>
+    <MudAlert Severity="Severity.Error" Variant="Variant.Filled" Class="my-2">The travel prices are expired! Find new travel routes with new prices!</MudAlert>
 }
 
 @if (travelPrices == null)
@@ -48,10 +48,6 @@ else
             </MudTable>
         }
     }
-    if (routeAvailable == false)
-    {
-        <MudAlert Severity="Severity.Error" Variant="Variant.Filled" Class="my-2">This travel route is not available!</MudAlert>
-    }
 }
 
 
@@ -59,9 +55,7 @@ else
     [Parameter] public string origin { get; set; }
     [Parameter] public string destination { get; set; }
 
-    private TravelPrices travelPrices;
-
-    private bool routeAvailable = false;
+    private TravelPrice travelPrices;
 
     private bool boughtTicket = false;
     private bool travelPricesExpiredError = false;
@@ -70,12 +64,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        travelPrices = await Http.GetFromJsonAsync<TravelPrices>("api/travelprices");
-    }
-
-    protected override void OnParametersSet()
-    {
-        routeAvailable = false;
+        travelPrices = await Http.GetFromJsonAsync<TravelPrice>("api/travelprices");
     }
 
     private async Task BuyTicket(Provider provider, RouteInfo routeInfo, string id)
@@ -104,7 +93,7 @@ else
     private bool isRouteAvailable(Leg travelPrice)
     {
         if (origin.Equals(travelPrice.RouteInfo.From.Name) && destination.Equals(travelPrice.RouteInfo.To.Name))
-            return routeAvailable = true;
+            return true;
         return false;
     }
 

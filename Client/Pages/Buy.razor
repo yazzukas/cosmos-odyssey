@@ -21,9 +21,14 @@
 
     private void FindRoutes(EventCallbackArgs args)
     {
-        _from = args.From;
-        _to = args.To;
-        if(_findRoutes) ChildComponent.Refresh();
-        else _findRoutes = true;
+        if (args == null)
+            _findRoutes = false;
+        else
+        {
+            _from = args.From;
+            _to = args.To;
+            if (_findRoutes) ChildComponent.Refresh();
+            else _findRoutes = true;
+        }
     }
 }
